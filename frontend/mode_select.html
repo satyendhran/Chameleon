@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Mode Selection</title>
+    <!-- TODO Jayant -->
+    <style>
+        /* TODO Jayant */
+    </style>
+</head>
+
+<body>
+
+    <h1>Mode Selection</h1>
+
+    <div class="section">
+        <h2>Vote for a Game Mode</h2>
+        <!-- TODO Jayant -->
+        <div class="mode-grid" id="mode-grid">
+
+            <div class="mode-card" data-mode="Imposter" id="card-imposter">
+                <h3>Imposter</h3>
+                <p>One imposter, rest are majority. Blend in or be found out.</p>
+            </div>
+
+            <div class="mode-card" data-mode="Imposter Jester" id="card-imposter-jester">
+                <h3>Imposter Jester</h3>
+                <p>Adds a Jester who secretly wants to be voted out.</p>
+            </div>
+
+            <div class="mode-card" data-mode="Apples & Pears" id="card-apples-pears">
+                <h3>Apples & Pears</h3>
+                <p>One player gets a slightly different word — can they blend in?</p>
+            </div>
+
+            <div class="mode-card" data-mode="Surprise" id="card-surprise">
+                <h3>Surprise</h3>
+                <p>A random mode is chosen at the start. Nobody knows until then.</p>
+            </div>
+
+        </div>
+
+        <br />
+        <!-- TODO Jayant — send vote via POST /api/vote/mode -->
+        <button id="vote-btn" disabled>Vote</button>
+        <p id="vote-status"></p>
+    </div>
+
+    <div class="section">
+        <h2>Live Tally</h2>
+        <!-- TODO Jayant — poll GET /api/vote/<match_id>/results or use WebSocket -->
+        <div id="tally-container">
+            <p id="tally-imposter">Imposter: 0 votes</p>
+            <div class="bar-wrap">
+                <div class="bar" id="bar-imposter"></div>
+            </div>
+
+            <p id="tally-jester">Imposter Jester: 0 votes</p>
+            <div class="bar-wrap">
+                <div class="bar" id="bar-jester"></div>
+            </div>
+
+            <p id="tally-apples">Apples &amp; Pears: 0 votes</p>
+            <div class="bar-wrap">
+                <div class="bar" id="bar-apples"></div>
+            </div>
+
+            <p id="tally-surprise">Surprise: 0 votes</p>
+            <div class="bar-wrap">
+                <div class="bar" id="bar-surprise"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="host-override-section" style="display:none;">
+        <h2>Host: Select Mode Directly</h2>
+        <!-- TODO Jayant — only show if current user is HumanHost; call POST /api/modes/<match_id>/select -->
+        <button id="host-select-btn">Select This Mode</button>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const matchId = params.get('match_id');
+        let selectedMode = null;
+
+        // TODO Jayant
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedMode = card.dataset.mode;
+                document.getElementById('vote-btn').disabled = false;
+            });
+        });
+
+        document.getElementById('vote-btn').addEventListener('click', async () => {
+            if (!selectedMode) return;
+            // TODO Jayant — POST /api/vote/mode with { match_id: matchId, choice: selectedMode }
+            document.getElementById('vote-status').textContent = `Voted for "${selectedMode}". Waiting for others…`;
+            document.getElementById('vote-btn').disabled = true;
+        });
+
+        // TODO Jayant
+        async function refreshTally() {
+            // TODO Jayant — GET /api/vote/<matchId>/results, update bar widths and counts
+        }
+
+        if (matchId) setInterval(refreshTally, 2000);
+    </script>
+
+</body>
+
+</html>

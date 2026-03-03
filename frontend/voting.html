@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Voting</title>
+    <!-- TODO Ambika -->
+    <style>
+        /* TODO Ambika */
+    </style>
+</head>
+
+<body>
+
+    <h1>Voting</h1>
+
+    <div class="section" id="elimination-section">
+        <h2>Elimination Vote</h2>
+        <p id="elim-prompt">Who do you think is the Imposter?</p>
+        <!-- TODO Ambika-->
+        <div id="elimination-player-list">
+            <div class="player-option">
+                <span>Player A</span>
+                <div class="bar-wrap">
+                    <div class="bar" id="bar-a"></div>
+                </div>
+                <button class="vote-player-btn" data-player="player_a">Vote Out</button>
+            </div>
+            <div class="player-option">
+                <span>Player B</span>
+                <div class="bar-wrap">
+                    <div class="bar" id="bar-b"></div>
+                </div>
+                <button class="vote-player-btn" data-player="player_b">Vote Out</button>
+            </div>
+            <!-- TODO Ambika -->
+        </div>
+        <p id="elim-status" style="font-size:0.85rem;color:#aaa;margin-top:0.75rem;"></p>
+    </div>
+
+    <div id="result-banner">
+        <p>Eliminated: <strong id="eliminated-name">—</strong></p>
+    </div>
+
+    <div class="section" id="award-section" style="display:none;">
+        <h2>Award Voting</h2>
+y
+        <div style="margin-bottom:1rem;">
+            <span class="award-tab active" data-award="GOATED">GOATED</span>
+            <span class="award-tab" data-award="GENERALIST">GENERALIST</span>
+            <span class="award-tab" data-award="AARONIC">AARONIC</span>
+        </div>
+
+        <p id="award-description" style="color:#aaa;font-size:0.85rem;">Best overall performance this match.</p>
+
+        <!-- TODO Ambika -->
+        <div id="award-player-list">
+            <div class="player-option">
+                <span>Player A</span>
+                <button class="vote-player-btn" data-player="player_a">Nominate</button>
+            </div>
+            <div class="player-option">
+                <span>Player B</span>
+                <button class="vote-player-btn" data-player="player_b">Nominate</button>
+            </div>
+            <!-- TODO Ambika -->
+        </div>
+        <p id="award-status" style="font-size:0.85rem;color:#aaa;margin-top:0.75rem;"></p>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const matchId = params.get('match_id');
+        let currentAward = 'GOATED';
+
+        const awardDescriptions = {
+            GOATED: 'Best overall performance this match.',
+            GENERALIST: 'Most adaptable player across different roles.',
+            AARONIC: 'Most notably Aaronic moment of the match.',
+        };
+
+
+        // TODO Ambika — POST /api/vote/eliminate with { match_id, target_player_id }
+        document.querySelectorAll('#elimination-player-list .vote-player-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const targetId = btn.dataset.player;
+                document.getElementById('elim-status').textContent = `Voted to eliminate ${targetId}. Waiting…`;
+                document.querySelectorAll('#elimination-player-list .vote-player-btn').forEach(b => b.disabled = true);
+                // TODO Ambika — call POST /api/vote/eliminate
+            });
+        });
+
+        // Award tab switcher
+        document.querySelectorAll('.award-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.award-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentAward = tab.dataset.award;
+                document.getElementById('award-description').textContent = awardDescriptions[currentAward];
+                // TODO Ambika 
+            });
+        });
+
+        // Award vote buttons
+        // TODO Ambika — POST /api/vote/award with { match_id, award_type: currentAward, nominee_id }
+        document.querySelectorAll('#award-player-list .vote-player-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                document.getElementById('award-status').textContent = `Voted ${btn.dataset.player} for ${currentAward}`;
+                document.querySelectorAll('#award-player-list .vote-player-btn').forEach(b => b.disabled = true);
+                // TODO Ambika — call POST /api/vote/award
+            });
+        });
+
+        // TODO Ambika — poll GET /api/vote/<matchId>/results to update bars and check for winner
+        async function refreshResults() {
+            // TODO Ambika
+        }
+
+        if (matchId) setInterval(refreshResults, 2000);
+    </script>
+
+</body>
+
+</html>

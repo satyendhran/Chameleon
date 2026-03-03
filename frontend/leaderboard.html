@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Leaderboard & Profile</title>
+    <!-- TODO Visu -->
+    <style>
+        /* TODO Visu */
+    </style>
+</head>
+
+<body>
+
+    <h1>Leaderboard & Profile</h1>
+    <div class="tabs">
+        <div class="tab active" data-tab="leaderboard">Leaderboard</div>
+        <div class="tab" data-tab="profile">My Profile</div>
+        <div class="tab" data-tab="history">Match History</div>
+    </div>
+    <div class="panel active" id="panel-leaderboard">
+        <h2 style="margin-top:0;color:#aaa;font-size:1rem;text-transform:uppercase;">Room Leaderboard</h2>
+        <!-- TODO Visu — fetch from GET /api/analytics/rooms/<room_id>/leaderboard -->
+        <table id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>W</th>
+                    <th>L</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr>
+                    <td colspan="5"><em>Loading…</em></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel" id="panel-profile">
+        <h2 style="margin-top:0;color:#aaa;font-size:1rem;text-transform:uppercase;">My Stats</h2>
+        <!-- TODO Visu — fetch from GET /api/analytics/players/<player_id>/stats -->
+        <div class="profile-grid">
+            <div class="stat-card">
+                <div class="value" id="stat-wins">—</div>
+                <div class="label">Wins</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-losses">—</div>
+                <div class="label">Losses</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-imposter-rate">—</div>
+                <div class="label">Imposter Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-avg-turn">—</div>
+                <div class="label">Avg Turn (s)</div>
+            </div>
+        </div>
+        <h3>Awards Earned</h3>
+        <!-- TODO Visu — render badges from global_stats.awards_earned -->
+        <div id="awards-container">
+            <em style="color:#aaa;">No awards yet.</em>
+        </div>
+    </div>
+
+    <div class="panel" id="panel-history">
+        <h2 style="margin-top:0;color:#aaa;font-size:1rem;text-transform:uppercase;">Match History</h2>
+        <!-- TODO Visu — fetch from GET /api/analytics/players/<player_id>/match-history -->
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Mode</th>
+                    <th>Result</th>
+                    <th>Role</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+                <tr>
+                    <td colspan="5"><em>Loading…</em></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+                // TODO Visu — lazy-load data for the newly active tab
+            });
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const roomId = params.get('room_id');
+        const playerId = sessionStorage.getItem('user_id');  // TODO Visu — set this on login
+
+        async function loadLeaderboard() {
+            // TODO Visu
+        }
+
+        async function loadProfile() {
+            // TODO Visu
+        }
+
+        async function loadHistory() {
+            // TODO Visu
+        }
+
+        if (roomId) loadLeaderboard();
+        if (playerId) loadProfile();
+    </script>
+
+</body>
+
+</html>

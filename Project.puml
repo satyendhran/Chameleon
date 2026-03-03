@@ -1,0 +1,562 @@
+@startuml ChameleonGame_Full
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam ArrowColor #444444
+skinparam class {
+  BackgroundColor #FAFAFA
+  BorderColor #333333
+  FontSize 12
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor #2471A3
+  FontSize 12
+}
+skinparam note {
+  BackgroundColor #FFF9C4
+  BorderColor #F0C040
+  FontSize 11
+}
+skinparam enum {
+  BackgroundColor #E8F8E8
+  BorderColor #2E7D32
+}
+
+title Chameleon Game — Full Class Diagram
+
+' ══════════════════════════════════════════
+' SECTION 1 — ENUMS
+' ══════════════════════════════════════════
+
+package "Enums" #EFEFEF {
+
+  enum AwardType {
+    GOATED
+    GENERALIST
+    AARONIC
+  }
+
+  enum GameStatus {
+    WAITING
+    IN_PROGRESS
+    COMPLETED
+  }
+
+  enum HostType {
+    COMPUTER
+    HUMAN
+  }
+
+  enum Phase {
+    DISCUSSION
+    VOTING
+    RESULT
+  }
+
+}
+
+note top of AwardType
+  Awards are voted on by players
+  after every match ends.
+end note
+
+note top of HostType
+  COMPUTER = GameController runs the match.
+  HUMAN = HumanHost replaces GameController.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 2 — INTERFACES
+' ══════════════════════════════════════════
+
+package "Interfaces" #E8EAF6 {
+
+  interface Host {
+    + selectMode() : GameMode
+    + assignRoles(players : List<User>) : void
+    + startMatch(match : Match) : void
+  }
+
+  interface GameMode {
+    + assignRoles(players : List<User>) : void
+    + getWinCondition() : String
+    + applySpecialRules() : void
+    + getModeName() : String
+  }
+
+  interface Role {
+    + getRoleName() : String
+    + getWinCondition() : String
+  }
+
+  interface VotingStrategy {
+    + collectVotes(options : List<String>, voters : List<User>) : Map<String, Integer>
+    + applyMajorityRule() : String
+    + resolveTie() : String
+  }
+
+  interface WordProvider {
+    + generateTopic() : String
+    + generateWords(mode : GameMode) : Map<String, String>
+  }
+
+  interface AwardStrategy {
+    + nominateAwards(match : Match) : void
+    + collectAwardVotes(voters : List<User>) : void
+    + assignAwards() : Map<String, AwardType>
+  }
+
+  interface ReconnectHandler {
+    + handleDisconnect(player : User) : void
+    + startGracePeriod(player : User) : void
+    + handleRejoin(player : User) : void
+  }
+
+  interface AnalyticsService {
+    + trackWin(player : User) : void
+    + trackLoss(player : User) : void
+    + trackAward(player : User, award : AwardType) : void
+    + trackTurnDuration(turn : Turn) : void
+    + updateLeaderboard(room : Room) : void
+    + getImposterSuccessRate(player : User) : float
+  }
+
+}
+
+note right of Host
+  Both GameController and HumanHost
+  implement this interface.
+  The Match does not care which one
+  is running it.
+end note
+
+note right of GameMode
+  Every game mode must implement
+  these four methods.
+  Adding a new mode = new class only.
+  Nothing else changes.
+end note
+
+note right of VotingStrategy
+  Used for three different vote types.
+  All follow the same contract:
+  collect → majority → tie-break.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 3 — USER & PROFILE
+' ══════════════════════════════════════════
+
+package "User Management" #FFF3E0 {
+
+  class User {
+    - userId : String
+    - username : String
+    - ...wordHash : String
+    + register() : void
+    + login() : boolean
+    + getProfile() : Profile
+    + getJoinedRooms() : List<Room>
+  }
+
+  class Profile {
+    - profileId : String
+    + getGlobalStats() : GlobalStats
+    + getRoomStats(room : Room) : RoomStats
+    + getMatchHistory() : List<Match>
+  }
+
+  class GlobalStats {
+    - wins : int
+    - losses : int
+    - awardsEarned : List<AwardType>
+    - imposterSuccessRate : float
+    - avgTurnDuration : float
+  }
+
+  class RoomStats {
+    - roomId : String
+    - wins : int
+    - losses : int
+    - ranking : int
+  }
+
+}
+
+note right of User
+  Every player in the game is a User.
+  A User has one Profile.
+  A User can join many Rooms.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 4 — ROOM & LEADERBOARD
+' ══════════════════════════════════════════
+
+package "Room System" #E8F5E9 {
+
+  class Room {
+    - roomId : String
+    - accessCode : String
+    - members : List<User>
+    + addMember(user : User) : void
+    + removeMember(user : User) : void
+    + createMatch(hostType : HostType) : Match
+    + getLeaderboard() : Leaderboard
+    + getMatchHistory() : List<Match>
+  }
+
+  class Leaderboard {
+    - roomId : String
+    - rankings : Map<User, Integer>
+    + updateRankings() : void
+    + getTopPlayers(n : int) : List<User>
+  }
+
+}
+
+note right of Room
+  Rooms are permanent.
+  They survive after matches end.
+  Players return to the same room
+  to play again.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 5 — MATCH, ROUND, TURN
+' ══════════════════════════════════════════
+
+package "Match System" #FCE4EC {
+
+  class Match {
+    - matchId : String
+    - status : GameStatus
+    - players : List<User>
+    - hostType : HostType
+    + start() : void
+    + end() : void
+    + getRounds() : List<Round>
+    + getResult() : MatchResult
+  }
+
+  class MatchResult {
+    - winningRole : String
+    - winningPlayers : List<User>
+    - awards : Map<User, AwardType>
+  }
+
+  class GameState {
+    - currentRound : int
+    - phase : Phase
+    - activePlayers : List<User>
+    - eliminatedPlayers : List<User>
+    + updateState() : void
+    + isMatchOver() : boolean
+  }
+
+  class Round {
+    - roundNumber : int
+    - durationSeconds : int
+    + start() : void
+    + end() : void
+    + getTurns() : List<Turn>
+  }
+
+  class Turn {
+    - playerId : String
+    - response : String
+    - timestamp : long
+    - locked : boolean
+    + submitResponse(response : String) : void
+    + lockTurn() : void
+  }
+
+}
+
+note right of Match
+  One Match = one full game session.
+  A Match has 1 or more Rounds.
+  GameState tracks what is happening
+  at any point during the match.
+end note
+
+note right of Turn
+  Each player gets one Turn per Round.
+  Once submitted, a Turn is locked.
+  No changes after locking.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 6 — HOST IMPLEMENTATIONS
+' ══════════════════════════════════════════
+
+package "Host Implementations" #EDE7F6 {
+
+  class GameController {
+    - votingStrategy : VotingStrategy
+    - wordProvider : WordProvider
+    - awardStrategy : AwardStrategy
+    - reconnectHandler : ReconnectHandler
+    - analyticsService : AnalyticsService
+    + selectMode() : GameMode
+    + assignRoles(players : List<User>) : void
+    + startMatch(match : Match) : void
+    + conductEliminationVoting() : void
+    + determineWinner() : MatchResult
+    + logMatch(match : Match) : void
+    + updateAnalytics() : void
+  }
+
+  class HumanHost {
+    - hostPlayer : User
+    + selectMode() : GameMode
+    + assignRoles(players : List<User>) : void
+    + randomAssignRoles(players : List<User>) : void
+    + startMatch(match : Match) : void
+  }
+
+}
+
+note right of GameController
+  The default host.
+  Depends ONLY on interfaces —
+  never on concrete classes.
+  This is the Dependency Inversion
+  Principle in action.
+end note
+
+note right of HumanHost
+  Replaces GameController entirely
+  for that match.
+  Can assign roles manually
+  or use randomAssignRoles().
+end note
+
+' ══════════════════════════════════════════
+' SECTION 7 — GAME MODES
+' ══════════════════════════════════════════
+
+package "Game Modes" #E3F2FD {
+
+  class ImposterMode {
+    + assignRoles(players : List<User>) : void
+    + getWinCondition() : String
+    + applySpecialRules() : void
+    + getModeName() : String
+  }
+
+  class ImposterJesterMode {
+    + assignRoles(players : List<User>) : void
+    + getWinCondition() : String
+    + applySpecialRules() : void
+    + getModeName() : String
+  }
+
+  class ApplesPearsMode {
+    + assignRoles(players : List<User>) : void
+    + getWinCondition() : String
+    + applySpecialRules() : void
+    + getModeName() : String
+  }
+
+  class SurpriseMode {
+    - delegateTo : GameMode
+    + assignRoles(players : List<User>) : void
+    + getWinCondition() : String
+    + applySpecialRules() : void
+    + getModeName() : String
+    + selectDelegate() : void
+  }
+
+}
+
+note bottom of SurpriseMode
+  Picks one of the other three modes
+  at random when the match starts.
+  Uses delegation — it calls the
+  chosen mode's methods directly.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 8 — ROLES
+' ══════════════════════════════════════════
+
+package "Roles" #FBE9E7 {
+
+  class MajorityRole {
+    + getRoleName() : String
+    + getWinCondition() : String
+  }
+
+  class ImposterRole {
+    + getRoleName() : String
+    + getWinCondition() : String
+    + guessWord(word : String) : boolean
+  }
+
+  class JesterRole {
+    + getRoleName() : String
+    + getWinCondition() : String
+  }
+
+}
+
+note right of ImposterRole
+  The Imposter wins by either
+  surviving the vote OR correctly
+  guessing the word on their turn.
+end note
+
+' ══════════════════════════════════════════
+' SECTION 9 — VOTING
+' ══════════════════════════════════════════
+
+package "Voting System" #F3E5F5 {
+
+  class ModeVoting {
+    + collectVotes(options : List<String>, voters : List<User>) : Map<String, Integer>
+    + applyMajorityRule() : String
+    + resolveTie() : String
+  }
+
+  class EliminationVoting {
+    + collectVotes(options : List<String>, voters : List<User>) : Map<String, Integer>
+    + applyMajorityRule() : String
+    + resolveTie() : String
+  }
+
+  class AwardVoting {
+    + collectVotes(options : List<String>, voters : List<User>) : Map<String, Integer>
+    + applyMajorityRule() : String
+    + resolveTie() : String
+  }
+
+}
+
+' ══════════════════════════════════════════
+' SECTION 10 — SUPPORT SERVICES
+' ══════════════════════════════════════════
+
+package "Support Services" #EFEBE9 {
+
+  class AutoWordProvider {
+    + generateTopic() : String
+    + generateWords(mode : GameMode) : Map<String, String>
+  }
+
+  class StandardAwardStrategy {
+    + nominateAwards(match : Match) : void
+    + collectAwardVotes(voters : List<User>) : void
+    + assignAwards() : Map<String, AwardType>
+  }
+
+  class TimedReconnectHandler {
+    - gracePeriodSeconds : int
+    + handleDisconnect(player : User) : void
+    + startGracePeriod(player : User) : void
+    + handleRejoin(player : User) : void
+  }
+
+  class MatchAnalyticsService {
+    + trackWin(player : User) : void
+    + trackLoss(player : User) : void
+    + trackAward(player : User, award : AwardType) : void
+    + trackTurnDuration(turn : Turn) : void
+    + updateLeaderboard(room : Room) : void
+    + getImposterSuccessRate(player : User) : float
+  }
+
+}
+
+note right of AutoWordProvider
+  Will be implemented by SAT.
+  Generates the topic and one word
+  per player depending on the mode.
+  Players cannot influence this.
+end note
+
+' ══════════════════════════════════════════
+' INTERFACE IMPLEMENTATIONS
+' ══════════════════════════════════════════
+
+GameController        ..|> Host
+HumanHost             ..|> Host
+
+ImposterMode          ..|> GameMode
+ImposterJesterMode    ..|> GameMode
+ApplesPearsMode       ..|> GameMode
+SurpriseMode          ..|> GameMode
+
+MajorityRole          ..|> Role
+ImposterRole          ..|> Role
+JesterRole            ..|> Role
+
+ModeVoting            ..|> VotingStrategy
+EliminationVoting     ..|> VotingStrategy
+AwardVoting           ..|> VotingStrategy
+
+AutoWordProvider      ..|> WordProvider
+StandardAwardStrategy ..|> AwardStrategy
+TimedReconnectHandler ..|> ReconnectHandler
+MatchAnalyticsService ..|> AnalyticsService
+
+' ══════════════════════════════════════════
+' DELEGATION
+' ══════════════════════════════════════════
+
+SurpriseMode o--> GameMode : delegates to
+
+' ══════════════════════════════════════════
+' DOMAIN RELATIONSHIPS
+' ══════════════════════════════════════════
+
+' User → Profile
+User "1" *-- "1" Profile : has
+
+' Profile → Stats
+Profile "1" *-- "1" GlobalStats   : contains
+Profile "1" *-- "0..*" RoomStats  : tracks
+
+' User → Room
+User "0..*" --> "0..*" Room : joins
+
+' Room → Leaderboard + Match
+Room "1" *-- "1" Leaderboard      : has
+Room "1" o-- "0..*" Match         : hosts
+
+' Match internals
+Match "1" *-- "1..*" Round        : contains
+Match "1" *-- "1" MatchResult     : produces
+Match "1" *-- "1" GameState       : tracks
+
+' Round → Turn
+Round "1" *-- "1..*" Turn         : contains
+
+' Host → Match
+Host "1" --> "1" Match            : manages
+
+' GameController → service interfaces
+GameController --> VotingStrategy    : uses
+GameController --> WordProvider      : uses
+GameController --> AwardStrategy     : uses
+GameController --> ReconnectHandler  : uses
+GameController --> AnalyticsService  : uses
+
+' Analytics → Room (updates leaderboard)
+MatchAnalyticsService --> Room       : updates leaderboard
+
+' MatchResult uses AwardType
+MatchResult --> AwardType            : references
+
+' Match uses GameStatus
+Match --> GameStatus                 : tracks status
+
+' GameState uses Phase
+GameState --> Phase                  : tracks phase
+
+' Room uses HostType to decide which host to create
+Room --> HostType                    : decides host
+
+@enduml

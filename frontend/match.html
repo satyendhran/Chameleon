@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Match</title>
+    <!-- TODO Kaarthik-->
+    <style>
+        /* TODO Kaarthik */
+    </style>
+</head>
+
+<body>
+
+    <h1> Match in Progress</h1>
+
+    <div class="section">
+        <h2>Status</h2>
+        <p>Round: <strong id="round-number">—</strong> &nbsp; Phase: <span class="phase-badge"
+                id="phase-badge">WAITING</span></p>
+        <p>Mode: <strong id="mode-name">—</strong></p>
+    </div>
+
+    <div class="section">
+        <h2>Your Word</h2>
+        <!-- TODO Kaarthik -->
+        <div class="word-card" id="player-word">???</div>
+        <p style="text-align:center;font-size:0.8rem;color:#888;margin-top:0.5rem;">Keep this secret. Say something
+            related but vague.</p>
+    </div>
+
+    <div class="section">
+        <h2>Active Players</h2>
+        <!-- TODO Kaarthik -->
+        <ul id="active-players">
+            <li><em>Waiting for game state…</em></li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2>Your Turn</h2>
+        <!-- TODO Kaarthik — POST /api/matches/<match_id>/rounds/<round_number>/turns -->
+        <textarea id="turn-response" placeholder="Type your response…"></textarea>
+        <button id="submit-turn-btn" style="margin-top:0.5rem;">Submit Turn</button>
+        <p id="turn-status" style="font-size:0.85rem;color:#aaa;"></p>
+    </div>
+
+    <div class="section">
+        <h2>Eliminated</h2>
+        <!-- TODO Kaarthik — populate from game_state.eliminated_players -->
+        <ul id="eliminated-players">
+            <li><em>None yet.</em></li>
+        </ul>
+    </div>
+
+    <div class="section" id="result-section" style="display:none;">
+        <h2>Result</h2>
+        <!-- TODO Kaarthik -->
+        <p id="result-text"></p>
+        <button id="go-to-voting-btn">Proceed to Award Voting</button>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const matchId = params.get('match_id');
+
+        // TODO Kaarthik — poll game state or use WebSocket
+        async function loadState() {
+            // TODO Kaarthik
+        }
+
+        document.getElementById('submit-turn-btn').addEventListener('click', async () => {
+            const response = document.getElementById('turn-response').value.trim();
+            // TODO Kaarthik
+        });
+
+        document.getElementById('go-to-voting-btn').addEventListener('click', () => {
+            // TODO Kaarthik
+        });
+
+        if (matchId) setInterval(loadState, 2000); // TODO Kaarthik
+    </script>
+
+</body>
+
+</html>

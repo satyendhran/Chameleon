@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Room</title>
+    <!-- TODO Sharvesh -->
+    <style>
+        /* TODO Sharvesh */
+    </style>
+</head>
+
+<body>
+
+    <h1>Room Lobby</h1>
+
+    <div class="section" id="room-info-section">
+        <h2>Room Info</h2>
+        <!-- TODO Sharvesh — populate room_id and access_code from GET /api/rooms/<room_id> -->
+        <p>Room ID: <span id="room-id">—</span></p>
+        <p>Access Code: <span id="access-code">—</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Create a New Room</h2>
+        <!-- TODO Sharvesh — call POST /api/rooms/create on click -->
+        <button id="create-room-btn">Create Room</button>
+
+        <h2 style="margin-top:1rem;">Join by Access Code</h2>
+        <input type="text" id="join-code-input" placeholder="Enter code" maxlength="8" />
+        <!-- TODO Sharvesh — call POST /api/rooms/join on click -->
+        <button id="join-room-btn">Join</button>
+        <p id="join-error" style="color:#e94560;font-size:0.85rem;"></p>
+    </div>
+
+    <div class="section">
+        <h2>Members</h2>
+        <!-- TODO Sharvesh — populate this list from GET /api/rooms/<room_id> -->
+        <ul id="member-list">
+            <li><em>No members loaded yet.</em></li>
+        </ul>
+        <!-- TODO Sharvesh — call POST /api/rooms/<room_id>/leave -->
+        <button id="leave-room-btn" style="margin-top:1rem;background:#555;">Leave Room</button>
+    </div>
+
+    <div class="section">
+        <h2>Leaderboard</h2>
+        <!-- TODO Sharvesh — populate from GET /api/rooms/<room_id>/leaderboard -->
+        <table id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr>
+                    <td colspan="3"><em>No data yet.</em></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Start a Match</h2>
+        <label>Host type:
+            <select id="host-type-select">
+                <option value="COMPUTER">Computer (GameController)</option>
+                <option value="HUMAN">Human Host</option>
+            </select>
+        </label>
+        <!-- TODO Sharvesh — call POST /api/matches/create then redirect to match.html -->
+        <button id="start-match-btn" style="margin-left:0.5rem;">Start Match</button>
+    </div>
+
+    <script>
+        // TODO Sharvesh
+
+        const params = new URLSearchParams(window.location.search);
+        const roomId = params.get('room_id');
+
+        async function loadRoom() {
+            // TODO Sharvesh — GET /api/rooms/<roomId>, populate #room-id, #access-code, #member-list, #leaderboard-body
+        }
+
+        document.getElementById('create-room-btn').addEventListener('click', async () => {
+            // TODO Sharvesh — POST /api/rooms/create, redirect to ?room_id=<new_id>
+        });
+
+        document.getElementById('join-room-btn').addEventListener('click', async () => {
+            // TODO Sharvesh — POST /api/rooms/join with { access_code: input.value }
+        });
+
+        document.getElementById('leave-room-btn').addEventListener('click', async () => {
+            // TODO Sharvesh — POST /api/rooms/<roomId>/leave, redirect
+        });
+
+        document.getElementById('start-match-btn').addEventListener('click', async () => {
+            // TODO Sharvesh — POST /api/matches/create with { room_id, host_type }, redirect
+        });
+
+        if (roomId) loadRoom();
+    </script>
+
+</body>
+
+</html>

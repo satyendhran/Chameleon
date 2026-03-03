@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chameleon — Register</title>
+    <!-- TODO Jishnu -->
+    <style>
+        /* TODO Jishnu */
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h1>Create Account</h1>
+        <form id="register-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Choose a username" required />
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Choose a password" required />
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm_password" placeholder="Repeat password"
+                required />
+
+            <p id="error-msg"></p>
+            <p id="success-msg"></p>
+
+            <button type="submit" id="register-btn">Register</button>
+        </form>
+
+        <div class="link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+    <script>
+        // TODO Jishnu
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm-password').value;
+            const errorMsg = document.getElementById('error-msg');
+            const successMsg = document.getElementById('success-msg');
+            // TODO Jishnu
+            errorMsg.textContent = 'Registration not yet implemented.';
+        });
+    </script>
+
+</body>
+
+</html>
